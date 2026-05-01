@@ -14,7 +14,7 @@ export async function apiRequest<T>(path: string, options: ApiRequestOptions = {
   const { auth = true, retryOnUnauthorized = true, headers, ...requestOptions } = options;
   const response = await fetch(buildUrl(path), {
     ...requestOptions,
-    headers: buildHeaders(headers, auth),
+    headers: buildHeaders(headers, auth, requestOptions.body),
   });
 
   if (response.status === 401 && auth && retryOnUnauthorized) {
@@ -66,9 +66,9 @@ function buildUrl(path: string) {
   return `${env.apiBaseUrl}${path}`;
 }
 
-function buildHeaders(headers: HeadersInit | undefined, auth: boolean): Headers {
+function buildHeaders(headers: HeadersInit | undefined, auth: boolean, body?: BodyInit | null): Headers {
   const result = new Headers(headers);
-  if (!result.has('Content-Type')) {
+  if (!result.has('Content-Type') && !(body instanceof FormData)) {
     result.set('Content-Type', 'application/json');
   }
 

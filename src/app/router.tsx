@@ -2,6 +2,9 @@ import { useEffect, useState, type ReactNode } from 'react';
 import { routes } from '../config/routes';
 import { LoginPage } from '../features/auth/pages/LoginPage';
 import { RegisterPage } from '../features/auth/pages/RegisterPage';
+import { AdminUserDetailPage } from '../features/admin/pages/AdminUserDetailPage';
+import { AdminUsersPage } from '../features/admin/pages/AdminUsersPage';
+import { ProducerProfilePage } from '../features/producer/pages/ProducerProfilePage';
 import { DashboardPage } from '../pages/DashboardPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
 import { useAuth } from '../hooks/useAuth';
@@ -38,11 +41,36 @@ export function Router() {
     );
   }
 
+  if (pathname === routes.profile) {
+    return (
+      <Protected>
+        <ProducerProfilePage />
+      </Protected>
+    );
+  }
+
+  if (pathname === routes.adminUsers) {
+    return (
+      <Protected requireRole="ADMIN">
+        <AdminUsersPage />
+      </Protected>
+    );
+  }
+
+  const adminUserDetailMatch = pathname.match(/^\/admin\/users\/(\d+)$/);
+  if (adminUserDetailMatch) {
+    return (
+      <Protected requireRole="ADMIN">
+        <AdminUserDetailPage userId={Number(adminUserDetailMatch[1])} />
+      </Protected>
+    );
+  }
+
   return <NotFoundPage />;
 }
 
-function Protected({ children }: { children: ReactNode }) {
-  const { isAuthenticated, isInitializing } = useAuth();
+function Protected({ children, requireRole }: { children: ReactNode; requireRole?: string }) {
+  const { user, isAuthenticated, isInitializing } = useAuth();
 
   useEffect(() => {
     if (!isInitializing && !isAuthenticated) {
@@ -56,6 +84,10 @@ function Protected({ children }: { children: ReactNode }) {
 
   if (!isAuthenticated) {
     return null;
+  }
+
+  if (requireRole && !user?.roles.includes(requireRole)) {
+    return <div className="screen-message">No tiene permisos para acceder a esta vista.</div>;
   }
 
   return children;
