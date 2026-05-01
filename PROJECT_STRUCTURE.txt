@@ -1,0 +1,132 @@
+AgroDirectoFrontend/
+|-- .gitignore
+|-- eslint.config.js
+|-- index.html
+|-- package-lock.json
+|-- package.json
+|-- PROJECT_STRUCTURE.md
+|-- PROJECT_STRUCTURE.txt
+|-- README.md
+|-- tsconfig.app.json
+|-- tsconfig.json
+|-- tsconfig.node.json
+|-- vite.config.ts
+|-- public/
+|-- src/
+|   |-- App.css
+|   |-- App.tsx
+|   |-- index.css
+|   |-- main.tsx
+|   |-- vite-env.d.ts
+|   |-- app/
+|   |   |-- App.tsx
+|   |   |-- router.tsx
+|   |   |-- providers/
+|   |       |-- AuthProvider.tsx
+|   |       |-- QueryProvider.tsx
+|   |-- assets/
+|   |   |-- hero.png
+|   |   |-- react.svg
+|   |   |-- vite.svg
+|   |   |-- icons/
+|   |   |-- images/
+|   |-- components/
+|   |   |-- feedback/
+|   |   |   |-- EmptyState.tsx
+|   |   |   |-- ErrorState.tsx
+|   |   |   |-- LoadingState.tsx
+|   |   |-- layout/
+|   |   |   |-- AppLayout.tsx
+|   |   |   |-- AuthLayout.tsx
+|   |   |   |-- Navbar.tsx
+|   |   |   |-- Sidebar.tsx
+|   |   |-- ui/
+|   |       |-- Button.tsx
+|   |       |-- Input.tsx
+|   |       |-- Modal.tsx
+|   |       |-- Select.tsx
+|   |       |-- Spinner.tsx
+|   |-- config/
+|   |   |-- env.ts
+|   |   |-- routes.ts
+|   |-- features/
+|   |   |-- auth/
+|   |   |   |-- api/
+|   |   |   |   |-- authApi.ts
+|   |   |   |-- components/
+|   |   |   |   |-- LoginForm.tsx
+|   |   |   |   |-- RegisterForm.tsx
+|   |   |   |-- pages/
+|   |   |   |   |-- LoginPage.tsx
+|   |   |   |   |-- RegisterPage.tsx
+|   |   |   |-- schemas/
+|   |   |   |   |-- authSchemas.ts
+|   |   |   |-- types/
+|   |   |       |-- authTypes.ts
+|   |   |-- buyer/
+|   |   |   |-- api/
+|   |   |   |-- components/
+|   |   |   |-- pages/
+|   |   |   |-- types/
+|   |   |-- orders/
+|   |   |   |-- api/
+|   |   |   |-- components/
+|   |   |   |-- pages/
+|   |   |   |-- types/
+|   |   |-- producer/
+|   |   |   |-- api/
+|   |   |   |   |-- producerApi.ts
+|   |   |   |-- components/
+|   |   |   |   |-- ProducerLocationMap.tsx
+|   |   |   |   |-- ProducerProfileForm.tsx
+|   |   |   |-- pages/
+|   |   |   |   |-- ProducerProfilePage.tsx
+|   |   |   |-- schemas/
+|   |   |   |   |-- producerSchemas.ts
+|   |   |   |-- types/
+|   |   |       |-- producerTypes.ts
+|   |   |-- products/
+|   |   |   |-- api/
+|   |   |   |   |-- productsApi.ts
+|   |   |   |-- components/
+|   |   |   |   |-- ProductCard.tsx
+|   |   |   |   |-- ProductForm.tsx
+|   |   |   |   |-- ProductList.tsx
+|   |   |   |-- pages/
+|   |   |   |   |-- ProductCreatePage.tsx
+|   |   |   |   |-- ProductListPage.tsx
+|   |   |   |-- schemas/
+|   |   |   |   |-- productSchemas.ts
+|   |   |   |-- types/
+|   |   |       |-- productTypes.ts
+|   |   |-- shipments/
+|   |       |-- api/
+|   |       |-- components/
+|   |       |-- pages/
+|   |       |-- types/
+|   |-- hooks/
+|   |   |-- useAuth.ts
+|   |   |-- useDebounce.ts
+|   |-- lib/
+|   |   |-- api/
+|   |   |   |-- apiError.ts
+|   |   |   |-- httpClient.ts
+|   |   |-- maps/
+|   |   |   |-- mapDefaults.ts
+|   |   |-- storage/
+|   |       |-- tokenStorage.ts
+|   |-- pages/
+|   |   |-- HomePage.tsx
+|   |   |-- NotFoundPage.tsx
+|   |   |-- UnauthorizedPage.tsx
+|   |-- styles/
+|   |   |-- globals.css
+|   |   |-- variables.css
+|   |-- types/
+|   |   |-- api.ts
+|   |   |-- common.ts
+|   |-- utils/
+|       |-- formatters.ts
+|       |-- validators.ts
+|
+|-- node_modules/  (generado por npm; no se versiona)
