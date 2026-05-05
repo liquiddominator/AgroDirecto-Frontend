@@ -1,4 +1,4 @@
 import { App } from './app/App';
-import './App.css';
+//import './App.css';
 
 export default App;

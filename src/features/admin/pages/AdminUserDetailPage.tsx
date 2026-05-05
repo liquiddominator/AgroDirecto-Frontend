@@ -1,12 +1,12 @@
 import { useEffect, useState } from 'react';
 import { navigate } from '../../../app/router';
 import { routes } from '../../../config/routes';
-import { isApiError } from '../../../lib/api/apiError';
 import * as adminUsersApi from '../api/adminUsersApi';
 import type { AdminUserDetail } from '../types/adminTypes';
 import { DocumentList } from '../../verification/components/VerificationDocumentsPanel';
 import * as verificationApi from '../../verification/api/verificationApi';
 import type { ReviewDecision } from '../../verification/types/verificationTypes';
+import { resolveErrorMessage } from '../../../utils/errorUtils';
 
 export function AdminUserDetailPage({ userId }: { userId: number }) {
   const [user, setUser] = useState<AdminUserDetail | null>(null);
@@ -164,15 +164,4 @@ export function AdminUserDetailPage({ userId }: { userId: number }) {
       </section>
     </main>
   );
-}
-
-function resolveErrorMessage(error: unknown) {
-  if (isApiError(error)) {
-    const detailMessages = Object.values(error.details);
-    return detailMessages.length > 0 ? detailMessages.join(' ') : error.message;
-  }
-  if (error instanceof Error) {
-    return error.message;
-  }
-  return 'No se pudo completar la operacion.';
 }

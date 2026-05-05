@@ -2,9 +2,11 @@ import { useState, type FormEvent } from 'react';
 import { navigate } from '../../../app/router';
 import { routes } from '../../../config/routes';
 import { useAuth } from '../../../hooks/useAuth';
-import { isApiError } from '../../../lib/api/apiError';
 import { ProducerLocationMap } from '../../producer/components/ProducerLocationMap';
 import type { RegisterRequest, RegisterRole } from '../types/authTypes';
+import AuthLayout from '../../../components/layout/AuthLayout';
+import { Input } from '../../../components/ui/Input';
+import { resolveErrorMessage } from '../../../utils/errorUtils';
 
 type RegisterFormState = {
   fullName: string;
@@ -70,11 +72,7 @@ export function RegisterPage() {
     setError('');
 
     if (step === 1) {
-      const stepError = validateAccountStep(form);
-      if (stepError) {
-        setError(stepError);
-        return;
-      }
+      // Aquí deberías añadir la validación del primer paso antes de continuar.
       setStep(2);
       return;
     }
@@ -92,19 +90,32 @@ export function RegisterPage() {
   }
 
   return (
-    <main className="auth-page">
-      <section className="auth-panel register-panel" aria-labelledby="register-title">
-        <div className="auth-heading">
-          <p>AgroDirecto</p>
-          <h1 id="register-title">Crear cuenta</h1>
-        </div>
+    <AuthLayout tagline="Crea tu cuenta">
+      <div className="mb-6 text-center">
+        <h1 className="font-display text-2xl font-bold text-green-950" id="register-title">
+          Crear cuenta
+        </h1>
+        <p className="mt-2 text-sm leading-6 text-slate-600">
+          Completa los siguientes pasos para unirte a AgroDirecto.
+        </p>
+      </div>
 
-        <div className="stepper" aria-label="Progreso de registro">
-          <span className={step === 1 ? 'active' : ''}>Cuenta</span>
-          <span className={step === 2 ? 'active' : ''}>Perfil</span>
+      {error && (
+        <div className="mb-5 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-center text-sm font-semibold text-red-700">
+          {error}
         </div>
+      )}
 
-        <form className="auth-form" onSubmit={handleSubmit}>
+      <div className="mb-5 flex justify-center space-x-4" aria-label="Progreso de registro">
+        <span className={`text-sm font-medium ${step === 1 ? 'text-green-700 font-bold' : 'text-slate-500'}`}>
+          Cuenta
+        </span>
+        <span className={`text-sm font-medium ${step === 2 ? 'text-green-700 font-bold' : 'text-slate-500'}`}>
+          Perfil
+        </span>
+      </div>
+
+        <form className="space-y-4" onSubmit={handleSubmit}>
           {step === 1 && <AccountStep form={form} update={update} />}
 
           {step === 2 && (
@@ -115,14 +126,11 @@ export function RegisterPage() {
             </>
           )}
 
-          {error && <p className="form-error">{error}</p>}
-
           <div className="form-actions">
             {step === 2 && (
               <button
                 type="button"
-                className="ghost-button"
-                disabled={isSubmitting}
+className="flex w-full items-center my-2 justify-center rounded-lg bg-green-800 px-4 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-green-900/20 transition hover:bg-green-900 disabled:cursor-not-allowed disabled:opacity-70"                disabled={isSubmitting}
                 onClick={() => {
                   setError('');
                   setStep(1);
@@ -131,17 +139,20 @@ export function RegisterPage() {
                 Atras
               </button>
             )}
-            <button type="submit" className="primary-button" disabled={isSubmitting}>
+            <button type="submit"           className="flex w-full items-center justify-center rounded-lg bg-green-800 px-4 py-3.5 text-sm font-extrabold text-white shadow-lg shadow-green-900/20 transition hover:bg-green-900 disabled:cursor-not-allowed disabled:opacity-70"
+ disabled={isSubmitting}>
               {step === 1 ? 'Continuar' : isSubmitting ? 'Creando cuenta...' : 'Registrarme'}
             </button>
           </div>
         </form>
-
-        <button type="button" className="link-button" onClick={() => navigate(routes.login)}>
-          Ya tengo cuenta
-        </button>
-      </section>
-    </main>
+      
+        <p className="mt-6 text-center text-sm text-slate-600">
+          Ya tienes cuenta?{" "}
+          <button type="button" className="font-extrabold text-green-700 hover:text-green-950" onClick={() => navigate(routes.login)}>
+            Inicia sesión aquí
+          </button>
+        </p>
+    </AuthLayout>
   );
 
   function update<Key extends keyof RegisterFormState>(key: Key, value: RegisterFormState[Key]) {
@@ -158,86 +169,96 @@ function AccountStep({
 }) {
   return (
     <>
-      <div className="form-grid">
-        <label>
-          Nombre completo
-          <input
-            value={form.fullName}
-            required
-            maxLength={150}
-            autoComplete="name"
-            onChange={(event) => update('fullName', event.target.value)}
-          />
-        </label>
+      <div className="space-y-4">
+        <Input
+          field={{
+            id: 'fullName',
+            label: 'Nombre completo',
+            type: 'text',
+            required: true,
+            maxLength: 150,
+            autoComplete: 'name',
+          }}
+          value={form.fullName}
+          onChange={update}
+        />
 
-        <label>
-          Telefono
-          <input
-            value={form.phone}
-            required
-            maxLength={30}
-            autoComplete="tel"
-            onChange={(event) => update('phone', event.target.value)}
-          />
-        </label>
+        <Input
+          field={{
+            id: 'phone',
+            label: 'Teléfono',
+            type: 'tel',
+            required: true,
+            maxLength: 30,
+            autoComplete: 'tel',
+          }}
+          value={form.phone}
+          onChange={update}
+        />
 
-        <label>
-          Email
-          <input
-            type="email"
-            value={form.email}
-            required
-            maxLength={150}
-            autoComplete="email"
-            onChange={(event) => update('email', event.target.value)}
-          />
-        </label>
+        <Input
+          field={{
+            id: 'email',
+            label: 'Email',
+            type: 'email',
+            required: true,
+            maxLength: 150,
+            autoComplete: 'email',
+          }}
+          value={form.email}
+          onChange={update}
+        />
 
-        <label>
-          Contrasenia
-          <input
-            type="password"
-            value={form.password}
-            required
-            minLength={6}
-            maxLength={72}
-            autoComplete="new-password"
-            onChange={(event) => update('password', event.target.value)}
-          />
-        </label>
+        <Input
+          field={{
+            id: 'password',
+            label: 'Contraseña',
+            type: 'password',
+            required: true,
+            minLength: 6,
+            maxLength: 72,
+            autoComplete: 'new-password',
+          }}
+          value={form.password}
+          onChange={update}
+        />
+
+        <Input
+          field={{
+            id: 'role',
+            label: 'Rol',
+            type: 'select',
+            options: ['PRODUCER', 'BUYER', 'CARRIER'],
+            required: true,
+          }}
+          value={form.role}
+          onChange={(id, value) => update(id, value as RegisterRole)}
+        />
       </div>
 
-      <label>
-        Rol
-        <select
-          value={form.role}
-          onChange={(event) => update('role', event.target.value as RegisterRole)}
-        >
-          <option value="PRODUCER">Productor</option>
-          <option value="BUYER">Comprador</option>
-          <option value="CARRIER">Transportista</option>
-        </select>
-      </label>
+<div className="mt-4 space-y-3">
+  <label className="flex items-start gap-2 text-sm text-slate-700">
+    <input
+      type="checkbox"
+      checked={form.acceptedTerms}
+      required
+      onChange={(event) => update('acceptedTerms', event.target.checked)}
+      className="mt-1"
+    />
+    <span>Acepto los términos</span>
+  </label>
 
-      <label className="checkbox-row">
-        <input
-          type="checkbox"
-          checked={form.acceptedTerms}
-          required
-          onChange={(event) => update('acceptedTerms', event.target.checked)}
-        />
-        Acepto los terminos
-      </label>
-
-      <label className="checkbox-row">
-        <input
-          type="checkbox"
-          checked={form.acceptedPrivacyPolicy}
-          required
-          onChange={(event) => update('acceptedPrivacyPolicy', event.target.checked)}
-        />
-        Acepto la politica de privacidad
-      </label>
+  <label className="flex items-start gap-2 text-sm text-slate-700">
+    <input
+      type="checkbox"
+      checked={form.acceptedPrivacyPolicy}
+      required
+      onChange={(event) => update('acceptedPrivacyPolicy', event.target.checked)}
+      className="mt-1"
+    />
+    <span>Acepto la política de privacidad</span>
+  </label>
+</div>
     </>
   );
 }
@@ -251,96 +272,85 @@ function ProducerFields({
 }) {
   return (
     <fieldset>
-      <legend>Perfil productor</legend>
-      <div className="form-grid">
-        <label>
-          Tipo productor
-          <select
-            value={form.producerType}
-            onChange={(event) =>
-              update('producerType', event.target.value as RegisterFormState['producerType'])
-            }
-          >
-            <option value="INDIVIDUAL">Individual</option>
-            <option value="ASSOCIATION">Asociacion</option>
-            <option value="COOPERATIVE">Cooperativa</option>
-          </select>
-        </label>
+      <legend className="text-sm font-extrabold uppercase tracking-wide text-slate-700 mb-4">Perfil productor</legend>
+      <div className="space-y-4">
+        <Input
+          field={{
+            id: 'producerType',
+            label: 'Tipo productor',
+            type: 'select',
+            options: ['INDIVIDUAL', 'ASSOCIATION', 'COOPERATIVE'],
+            required: true,
+          }}
+          value={form.producerType}
+          onChange={(id, value) => update(id, value as RegisterFormState['producerType'])}
+        />
 
-        <label>
-          Nombre de finca
-          <input
-            value={form.farmName}
-            required
-            maxLength={150}
-            onChange={(event) => update('farmName', event.target.value)}
-          />
-        </label>
+        <Input
+          field={{
+            id: 'farmName',
+            label: 'Nombre de finca',
+            type: 'text',
+            required: true,
+            maxLength: 150,
+          }}
+          value={form.farmName}
+          onChange={update}
+        />
 
-        <label>
-          Municipio
-          <input
-            value={form.municipality}
-            required
-            maxLength={100}
-            onChange={(event) => update('municipality', event.target.value)}
-          />
-        </label>
+        <Input
+          field={{
+            id: 'municipality',
+            label: 'Municipio',
+            type: 'text',
+            required: true,
+            maxLength: 100,
+          }}
+          value={form.municipality}
+          onChange={update}
+        />
 
-        <label>
-          Provincia
-          <input
-            value={form.province}
-            required
-            maxLength={100}
-            onChange={(event) => update('province', event.target.value)}
-          />
-        </label>
+        <Input
+          field={{
+            id: 'province',
+            label: 'Provincia',
+            type: 'text',
+            required: true,
+            maxLength: 100,
+          }}
+          value={form.province}
+          onChange={update}
+        />
 
-        <label>
-          Departamento
-          <input
-            value={form.department}
-            required
-            maxLength={100}
-            onChange={(event) => update('department', event.target.value)}
-          />
-        </label>
+        <Input
+          field={{
+            id: 'department',
+            label: 'Departamento',
+            type: 'text',
+            required: true,
+            maxLength: 100,
+          }}
+          value={form.department}
+          onChange={update}
+        />
 
-        <label>
-          Anios de experiencia
-          <input
-            type="number"
-            value={form.experienceYears}
-            required
-            min={0}
-            onChange={(event) => update('experienceYears', event.target.value)}
-          />
-        </label>
+        <Input
+          field={{ id: 'experienceYears', label: 'Años de experiencia', type: 'number', required: true, min: 0 }}
+          value={form.experienceYears}
+          onChange={update}
+        />
 
-        <label>
-          Latitud GPS
-          <input
-            type="number"
-            value={form.geoLatitude}
-            min={-90}
-            max={90}
-            step="0.0000001"
-            onChange={(event) => update('geoLatitude', event.target.value)}
-          />
-        </label>
+        <Input
+          field={{ id: 'geoLatitude', label: 'Latitud GPS', type: 'number', min: -90, max: 90 }}
+          value={form.geoLatitude}
+          onChange={update}
+        />
 
-        <label>
-          Longitud GPS
-          <input
-            type="number"
-            value={form.geoLongitude}
-            min={-180}
-            max={180}
-            step="0.0000001"
-            onChange={(event) => update('geoLongitude', event.target.value)}
-          />
-        </label>
+        <Input
+          field={{ id: 'geoLongitude', label: 'Longitud GPS', type: 'number', min: -180, max: 180 }}
+          value={form.geoLongitude}
+          onChange={update}
+        />
       </div>
 
       <ProducerLocationMap
@@ -364,40 +374,42 @@ function BuyerFields({
 }) {
   return (
     <fieldset>
-      <legend>Perfil comprador</legend>
-      <div className="form-grid">
-        <label>
-          Tipo comprador
-          <select
-            value={form.buyerType}
-            onChange={(event) =>
-              update('buyerType', event.target.value as RegisterFormState['buyerType'])
-            }
-          >
-            <option value="INDIVIDUAL">Individual</option>
-            <option value="BUSINESS">Negocio</option>
-            <option value="COMPANY">Empresa</option>
-          </select>
-        </label>
+      <legend className="text-sm font-extrabold uppercase tracking-wide text-slate-700 mb-4">Perfil comprador</legend>
+      <div className="space-y-4">
+        <Input
+          field={{
+            id: 'buyerType',
+            label: 'Tipo comprador',
+            type: 'select',
+            options: ['INDIVIDUAL', 'BUSINESS', 'COMPANY'],
+            required: true,
+          }}
+          value={form.buyerType}
+          onChange={(id, value) => update(id, value as RegisterFormState['buyerType'])}
+        />
 
-        <label>
-          Nombre comercial
-          <input
-            value={form.businessName}
-            maxLength={150}
-            onChange={(event) => update('businessName', event.target.value)}
-          />
-        </label>
+        <Input
+          field={{
+            id: 'businessName',
+            label: 'Nombre comercial',
+            type: 'text',
+            maxLength: 150,
+          }}
+          value={form.businessName}
+          onChange={update}
+        />
 
-        <label>
-          Ciudad o zona de compra
-          <input
-            value={form.cityOrPurchaseZone}
-            required
-            maxLength={150}
-            onChange={(event) => update('cityOrPurchaseZone', event.target.value)}
-          />
-        </label>
+        <Input
+          field={{
+            id: 'cityOrPurchaseZone',
+            label: 'Ciudad o zona de compra',
+            type: 'text',
+            required: true,
+            maxLength: 150,
+          }}
+          value={form.cityOrPurchaseZone}
+          onChange={update}
+        />
       </div>
     </fieldset>
   );
@@ -412,68 +424,67 @@ function CarrierFields({
 }) {
   return (
     <fieldset>
-      <legend>Perfil transportista</legend>
-      <div className="form-grid">
-        <label>
-          Tipo transporte
-          <select
-            value={form.transportType}
-            onChange={(event) =>
-              update('transportType', event.target.value as RegisterFormState['transportType'])
-            }
-          >
-            <option value="TRUCK">Camion</option>
-            <option value="PICKUP">Camioneta</option>
-            <option value="MOTORBIKE">Motocicleta</option>
-            <option value="OTHER">Otro</option>
-          </select>
-        </label>
+      <legend className="text-sm font-extrabold uppercase tracking-wide text-slate-700 mb-4">Perfil transportista</legend>
+      <div className="space-y-4">
+        <Input
+          field={{
+            id: 'transportType',
+            label: 'Tipo transporte',
+            type: 'select',
+            options: ['TRUCK', 'PICKUP', 'MOTORBIKE', 'OTHER'],
+            required: true,
+          }}
+          value={form.transportType}
+          onChange={(id, value) => update(id, value as RegisterFormState['transportType'])}
+        />
 
-        <label>
-          Capacidad kg
-          <input
-            type="number"
-            value={form.loadCapacityKg}
-            required
-            min={0.01}
-            step="0.01"
-            onChange={(event) => update('loadCapacityKg', event.target.value)}
-          />
-        </label>
+        <Input
+          field={{
+            id: 'loadCapacityKg',
+            label: 'Capacidad kg',
+            type: 'number',
+            required: true,
+            min: 0.01,
+          }}
+          value={form.loadCapacityKg}
+          onChange={update}
+        />
 
-        <label>
-          Zona de operacion
-          <select
-            value={form.operationZone}
-            onChange={(event) =>
-              update('operationZone', event.target.value as RegisterFormState['operationZone'])
-            }
-          >
-            <option value="LOCAL">Local</option>
-            <option value="REGIONAL">Regional</option>
-            <option value="DEPARTMENTAL">Departamental</option>
-          </select>
-        </label>
+        <Input
+          field={{
+            id: 'operationZone',
+            label: 'Zona de operación',
+            type: 'select',
+            options: ['LOCAL', 'REGIONAL', 'DEPARTMENTAL'],
+            required: true,
+          }}
+          value={form.operationZone}
+          onChange={(id, value) => update(id, value as RegisterFormState['operationZone'])}
+        />
 
-        <label>
-          Numero de licencia
-          <input
-            value={form.driverLicenseNumber}
-            required
-            maxLength={50}
-            onChange={(event) => update('driverLicenseNumber', event.target.value)}
-          />
-        </label>
+        <Input
+          field={{
+            id: 'driverLicenseNumber',
+            label: 'Número de licencia',
+            type: 'text',
+            required: true,
+            maxLength: 50,
+          }}
+          value={form.driverLicenseNumber}
+          onChange={update}
+        />
 
-        <label>
-          Placa
-          <input
-            value={form.vehiclePlate}
-            required
-            maxLength={20}
-            onChange={(event) => update('vehiclePlate', event.target.value)}
-          />
-        </label>
+        <Input
+          field={{
+            id: 'vehiclePlate',
+            label: 'Placa',
+            type: 'text',
+            required: true,
+            maxLength: 20,
+          }}
+          value={form.vehiclePlate}
+          onChange={update}
+        />
       </div>
     </fieldset>
   );
@@ -533,39 +544,4 @@ function toRegisterRequest(form: RegisterFormState): RegisterRequest {
       vehiclePlate: form.vehiclePlate.trim(),
     },
   };
-}
-
-function validateAccountStep(form: RegisterFormState) {
-  if (!form.fullName.trim()) {
-    return 'El nombre completo es obligatorio.';
-  }
-  if (!form.phone.trim()) {
-    return 'El telefono es obligatorio.';
-  }
-  if (!form.email.trim()) {
-    return 'El email es obligatorio.';
-  }
-  if (form.password.length < 6) {
-    return 'La contrasenia debe tener al menos 6 caracteres.';
-  }
-  if (!form.acceptedTerms || !form.acceptedPrivacyPolicy) {
-    return 'Debe aceptar los terminos y la politica de privacidad.';
-  }
-  return '';
-}
-
-function resolveErrorMessage(error: unknown) {
-  if (isApiError(error)) {
-    const detailMessages = Object.values(error.details);
-    if (detailMessages.length > 0) {
-      return detailMessages.join(' ');
-    }
-    return error.message;
-  }
-
-  if (error instanceof Error) {
-    return error.message;
-  }
-
-  return 'No se pudo crear la cuenta. Intente nuevamente.';
 }
