@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Input as BaseInput } from './input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './select';
 
+// Define types for the 'field' prop. Note: 'select' type is handled separately in the component.
 type FieldType = 'text' | 'password' | 'email' | 'number' | 'tel' | 'select';
 
 interface FieldConfig<TKey extends string> {
@@ -19,14 +20,14 @@ interface FieldConfig<TKey extends string> {
 }
 
 // Define props for the Input component
-interface InputProps<TKey extends string> {
+interface InputFieldProps<TKey extends string> {
   field: FieldConfig<TKey>;
   value: string | number | readonly string[]; // Input elements can return various value types
   onChange: (id: TKey, value: string) => void;
   error?: string;
 }
 
-export function Input<TKey extends string>({ field, value, onChange, error }: InputProps<TKey>) {
+export function InputField<TKey extends string>({ field, value, onChange, error }: InputFieldProps<TKey>) {
   const [showPassword, setShowPassword] = useState(false);
   const isPassword = field.type === "password";
   const inputType = isPassword && showPassword ? "text" : field.type;

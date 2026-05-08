@@ -4,7 +4,7 @@ import { routes } from '../../../config/routes';
 import { resolveErrorMessage } from '../../../utils/errorUtils';
 import { useAuth } from '../../../hooks/useAuth';
 import AuthLayout from '../../../components/layout/AuthLayout';
-import { Input } from '../../../components/ui/Input';
+import { InputField } from '../../../components/ui/InputField';
 
 export function LoginPage() {
   const { login } = useAuth();
@@ -47,7 +47,7 @@ export function LoginPage() {
       )}
 
       <form className="space-y-4" onSubmit={handleSubmit}>
-        <Input
+        <InputField
           field={{
             id: 'email',
             label: 'Email',
@@ -59,7 +59,7 @@ export function LoginPage() {
           onChange={update}
         />
 
-        <Input
+        <InputField
           field={{
             id: 'password',
             label: 'Contraseña',

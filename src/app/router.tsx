@@ -1,4 +1,5 @@
-import { useEffect, useState, type ReactNode } from 'react';
+import { type ReactNode } from 'react';
+import { createBrowserRouter, RouterProvider, Navigate, useParams } from 'react-router-dom';
 import { routes } from '../config/routes';
 import { LoginPage } from '../features/auth/pages/LoginPage';
 import { RegisterPage } from '../features/auth/pages/RegisterPage';
@@ -7,83 +8,24 @@ import { AdminUsersPage } from '../features/admin/pages/AdminUsersPage';
 import { ProducerProfilePage } from '../features/producer/pages/ProducerProfilePage';
 import { DashboardPage } from '../pages/DashboardPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
+import { ProductsPage } from '../features/products/pages/ProductsPage';
+import { HomePage } from '../pages/HomePage';
 import { useAuth } from '../hooks/useAuth';
 
-export function navigate(path: string) {
-  window.history.pushState({}, '', path);
-  window.dispatchEvent(new PopStateEvent('popstate'));
-}
-
-export function Router() {
-  const pathname = usePathname();
-
-  if (pathname === '/' || pathname === routes.login) {
-    return (
-      <PublicOnly>
-        <LoginPage />
-      </PublicOnly>
-    );
-  }
-
-  if (pathname === routes.register) {
-    return (
-      <PublicOnly>
-        <RegisterPage />
-      </PublicOnly>
-    );
-  }
-
-  if (pathname === routes.dashboard) {
-    return (
-      <Protected>
-        <DashboardPage />
-      </Protected>
-    );
-  }
-
-  if (pathname === routes.profile) {
-    return (
-      <Protected>
-        <ProducerProfilePage />
-      </Protected>
-    );
-  }
-
-  if (pathname === routes.adminUsers) {
-    return (
-      <Protected requireRole="ADMIN">
-        <AdminUsersPage />
-      </Protected>
-    );
-  }
-
-  const adminUserDetailMatch = pathname.match(/^\/admin\/users\/(\d+)$/);
-  if (adminUserDetailMatch) {
-    return (
-      <Protected requireRole="ADMIN">
-        <AdminUserDetailPage userId={Number(adminUserDetailMatch[1])} />
-      </Protected>
-    );
-  }
-
-  return <NotFoundPage />;
+function AdminUserDetailWrapper() {
+  const { id } = useParams();
+  return <AdminUserDetailPage userId={Number(id)} />;
 }
 
 function Protected({ children, requireRole }: { children: ReactNode; requireRole?: string }) {
   const { user, isAuthenticated, isInitializing } = useAuth();
-
-  useEffect(() => {
-    if (!isInitializing && !isAuthenticated) {
-      navigate(routes.login);
-    }
-  }, [isAuthenticated, isInitializing]);
 
   if (isInitializing) {
     return <div className="screen-message">Cargando sesion...</div>;
   }
 
   if (!isAuthenticated) {
-    return null;
+    return <Navigate to={routes.login} replace />;
   }
 
   if (requireRole && !user?.roles.includes(requireRole)) {
@@ -96,34 +38,48 @@ function Protected({ children, requireRole }: { children: ReactNode; requireRole
 function PublicOnly({ children }: { children: ReactNode }) {
   const { isAuthenticated, isInitializing } = useAuth();
 
-  useEffect(() => {
-    if (!isInitializing && isAuthenticated) {
-      navigate(routes.dashboard);
-    }
-  }, [isAuthenticated, isInitializing]);
-
   if (isInitializing) {
     return <div className="screen-message">Cargando sesion...</div>;
   }
 
   if (isAuthenticated) {
-    return null;
+    return <Navigate to={routes.dashboard || '/dashboard'} replace />;
   }
 
   return children;
 }
 
-function usePathname() {
-  const [pathname, setPathname] = useState(window.location.pathname);
+export const appRouter = createBrowserRouter([
+  {
+    path: routes.login,
+    element: <PublicOnly><LoginPage /></PublicOnly>
+  },
+  {
+    path: routes.register,
+    element: <PublicOnly><RegisterPage /></PublicOnly>
+  },
+  {
+    path: '/',
+    element: <Protected><HomePage /></Protected>,
+    children: [
+      { index: true, element: <Navigate to={routes.dashboard || '/dashboard'} replace /> },
+      { path: routes.dashboard || '/dashboard', element: <DashboardPage /> },
+      { path: routes.profile || '/perfil', element: <ProducerProfilePage /> },
+      { path: '/productos', element: <ProductsPage /> },
+      { path: routes.adminUsers || '/admin/users', element: <Protected requireRole="ADMIN"><AdminUsersPage /></Protected> },
+      { path: '/admin/users/:id', element: <Protected requireRole="ADMIN"><AdminUserDetailWrapper /></Protected> }
+    ]
+  },
+  {
+    path: '*',
+    element: <NotFoundPage />
+  }
+]);
 
-  useEffect(() => {
-    function handlePopState() {
-      setPathname(window.location.pathname);
-    }
+export function navigate(path: string) {
+  appRouter.navigate(path);
+}
 
-    window.addEventListener('popstate', handlePopState);
-    return () => window.removeEventListener('popstate', handlePopState);
-  }, []);
-
-  return pathname;
+export function Router() {
+  return <RouterProvider router={appRouter} />;
 }

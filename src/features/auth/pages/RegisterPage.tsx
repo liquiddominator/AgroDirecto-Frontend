@@ -5,8 +5,9 @@ import { useAuth } from '../../../hooks/useAuth';
 import { ProducerLocationMap } from '../../producer/components/ProducerLocationMap';
 import type { RegisterRequest, RegisterRole } from '../types/authTypes';
 import AuthLayout from '../../../components/layout/AuthLayout';
-import { Input } from '../../../components/ui/Input';
+import { InputField } from '../../../components/ui/InputField';
 import { resolveErrorMessage } from '../../../utils/errorUtils';
+import { ROLES } from '../../../config/roles';
 
 type RegisterFormState = {
   fullName: string;
@@ -39,7 +40,7 @@ const initialForm: RegisterFormState = {
   email: '',
   password: '',
   phone: '',
-  role: 'PRODUCER',
+  role: ROLES.PRODUCER as RegisterRole,
   acceptedTerms: false,
   acceptedPrivacyPolicy: false,
   producerType: 'INDIVIDUAL',
@@ -120,9 +121,9 @@ export function RegisterPage() {
 
           {step === 2 && (
             <>
-              {form.role === 'PRODUCER' && <ProducerFields form={form} update={update} />}
-              {form.role === 'BUYER' && <BuyerFields form={form} update={update} />}
-              {form.role === 'CARRIER' && <CarrierFields form={form} update={update} />}
+              {form.role === ROLES.PRODUCER && <ProducerFields form={form} update={update} />}
+              {form.role === ROLES.BUYER && <BuyerFields form={form} update={update} />}
+              {form.role === ROLES.CARRIER && <CarrierFields form={form} update={update} />}
             </>
           )}
 
@@ -170,7 +171,7 @@ function AccountStep({
   return (
     <>
       <div className="space-y-4">
-        <Input
+        <InputField
           field={{
             id: 'fullName',
             label: 'Nombre completo',
@@ -183,7 +184,7 @@ function AccountStep({
           onChange={update}
         />
 
-        <Input
+        <InputField
           field={{
             id: 'phone',
             label: 'Teléfono',
@@ -196,7 +197,7 @@ function AccountStep({
           onChange={update}
         />
 
-        <Input
+        <InputField
           field={{
             id: 'email',
             label: 'Email',
@@ -209,7 +210,7 @@ function AccountStep({
           onChange={update}
         />
 
-        <Input
+        <InputField
           field={{
             id: 'password',
             label: 'Contraseña',
@@ -223,12 +224,12 @@ function AccountStep({
           onChange={update}
         />
 
-        <Input
+        <InputField
           field={{
             id: 'role',
             label: 'Rol',
             type: 'select',
-            options: ['PRODUCER', 'BUYER', 'CARRIER'],
+            options: [ROLES.PRODUCER, ROLES.BUYER, ROLES.CARRIER],
             required: true,
           }}
           value={form.role}
@@ -274,7 +275,7 @@ function ProducerFields({
     <fieldset>
       <legend className="text-sm font-extrabold uppercase tracking-wide text-slate-700 mb-4">Perfil productor</legend>
       <div className="space-y-4">
-        <Input
+        <InputField
           field={{
             id: 'producerType',
             label: 'Tipo productor',
@@ -286,7 +287,7 @@ function ProducerFields({
           onChange={(id, value) => update(id, value as RegisterFormState['producerType'])}
         />
 
-        <Input
+        <InputField
           field={{
             id: 'farmName',
             label: 'Nombre de finca',
@@ -298,7 +299,7 @@ function ProducerFields({
           onChange={update}
         />
 
-        <Input
+        <InputField
           field={{
             id: 'municipality',
             label: 'Municipio',
@@ -310,7 +311,7 @@ function ProducerFields({
           onChange={update}
         />
 
-        <Input
+        <InputField
           field={{
             id: 'province',
             label: 'Provincia',
@@ -322,7 +323,7 @@ function ProducerFields({
           onChange={update}
         />
 
-        <Input
+        <InputField
           field={{
             id: 'department',
             label: 'Departamento',
@@ -334,19 +335,19 @@ function ProducerFields({
           onChange={update}
         />
 
-        <Input
+        <InputField
           field={{ id: 'experienceYears', label: 'Años de experiencia', type: 'number', required: true, min: 0 }}
           value={form.experienceYears}
           onChange={update}
         />
 
-        <Input
+        <InputField
           field={{ id: 'geoLatitude', label: 'Latitud GPS', type: 'number', min: -90, max: 90 }}
           value={form.geoLatitude}
           onChange={update}
         />
 
-        <Input
+        <InputField
           field={{ id: 'geoLongitude', label: 'Longitud GPS', type: 'number', min: -180, max: 180 }}
           value={form.geoLongitude}
           onChange={update}
@@ -376,7 +377,7 @@ function BuyerFields({
     <fieldset>
       <legend className="text-sm font-extrabold uppercase tracking-wide text-slate-700 mb-4">Perfil comprador</legend>
       <div className="space-y-4">
-        <Input
+        <InputField
           field={{
             id: 'buyerType',
             label: 'Tipo comprador',
@@ -388,7 +389,7 @@ function BuyerFields({
           onChange={(id, value) => update(id, value as RegisterFormState['buyerType'])}
         />
 
-        <Input
+        <InputField
           field={{
             id: 'businessName',
             label: 'Nombre comercial',
@@ -399,7 +400,7 @@ function BuyerFields({
           onChange={update}
         />
 
-        <Input
+        <InputField
           field={{
             id: 'cityOrPurchaseZone',
             label: 'Ciudad o zona de compra',
@@ -426,7 +427,7 @@ function CarrierFields({
     <fieldset>
       <legend className="text-sm font-extrabold uppercase tracking-wide text-slate-700 mb-4">Perfil transportista</legend>
       <div className="space-y-4">
-        <Input
+        <InputField
           field={{
             id: 'transportType',
             label: 'Tipo transporte',
@@ -438,7 +439,7 @@ function CarrierFields({
           onChange={(id, value) => update(id, value as RegisterFormState['transportType'])}
         />
 
-        <Input
+        <InputField
           field={{
             id: 'loadCapacityKg',
             label: 'Capacidad kg',
@@ -450,7 +451,7 @@ function CarrierFields({
           onChange={update}
         />
 
-        <Input
+        <InputField
           field={{
             id: 'operationZone',
             label: 'Zona de operación',
@@ -462,7 +463,7 @@ function CarrierFields({
           onChange={(id, value) => update(id, value as RegisterFormState['operationZone'])}
         />
 
-        <Input
+        <InputField
           field={{
             id: 'driverLicenseNumber',
             label: 'Número de licencia',
@@ -474,7 +475,7 @@ function CarrierFields({
           onChange={update}
         />
 
-        <Input
+        <InputField
           field={{
             id: 'vehiclePlate',
             label: 'Placa',
@@ -501,7 +502,7 @@ function toRegisterRequest(form: RegisterFormState): RegisterRequest {
     acceptedPrivacyPolicy: form.acceptedPrivacyPolicy,
   };
 
-  if (form.role === 'PRODUCER') {
+  if (form.role === ROLES.PRODUCER) {
     const hasLatitude = form.geoLatitude.trim() !== '';
     const hasLongitude = form.geoLongitude.trim() !== '';
     if (hasLatitude !== hasLongitude) {
@@ -523,7 +524,7 @@ function toRegisterRequest(form: RegisterFormState): RegisterRequest {
     };
   }
 
-  if (form.role === 'BUYER') {
+  if (form.role === ROLES.BUYER) {
     return {
       ...baseRequest,
       buyerProfile: {
