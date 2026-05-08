@@ -1,5 +1,5 @@
-import { useMemo } from 'react';
-import { MapContainer, Marker, TileLayer, useMapEvents } from 'react-leaflet';
+import { useEffect, useMemo } from 'react';
+import { MapContainer, Marker, TileLayer, useMapEvents, useMap } from 'react-leaflet';
 import { divIcon } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { SANTA_CRUZ_BOLIVIA } from '../../lib/maps/mapDefaults';
@@ -9,9 +9,12 @@ interface LocationMapProps {
   longitude?: string | number | null;
   onChange?: (latitude: string, longitude: string) => void;
   readOnly?: boolean;
+  flyTo?: [number, number] | null;
+  className?: string;
+  style?: React.CSSProperties;
 }
 
-export function LocationMap({ latitude, longitude, onChange, readOnly = false }: LocationMapProps) {
+export function LocationMap({ latitude, longitude, onChange, readOnly = false, flyTo, className = "w-full", style = { height: '400px' } }: LocationMapProps) {
   const selectedPosition = useMemo<[number, number] | null>(() => {
     if (!latitude || !longitude) return null;
 
@@ -30,13 +33,14 @@ export function LocationMap({ latitude, longitude, onChange, readOnly = false }:
   ];
 
   return (
-    <div className="w-full" style={{ height: '400px' }}>
+    <div className={className} style={style}>
       <MapContainer center={center} zoom={SANTA_CRUZ_BOLIVIA.zoom} style={{ height: '100%', width: '100%', zIndex: 0 }}>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         {!readOnly && onChange && <LocationPicker onChange={onChange} />}
+        {flyTo && <MapController flyTo={flyTo} />}
         <Marker position={selectedPosition || center} icon={markerIcon} />
       </MapContainer>
     </div>
@@ -49,6 +53,16 @@ function LocationPicker({ onChange }: { onChange: (lat: string, lng: string) => 
       onChange(event.latlng.lat.toFixed(7), event.latlng.lng.toFixed(7));
     },
   });
+  return null;
+}
+
+function MapController({ flyTo }: { flyTo?: [number, number] | null }) {
+  const map = useMap();
+  useEffect(() => {
+    if (flyTo) {
+      map.flyTo(flyTo, 14, { duration: 1.5 });
+    }
+  }, [flyTo, map]);
   return null;
 }
 

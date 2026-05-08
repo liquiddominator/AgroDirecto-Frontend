@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { navigate } from '../../../app/router';
 import { routes } from '../../../config/routes';
 import { useAuth } from '../../../hooks/useAuth';
-import { ProducerLocationMap } from '../components/ProducerLocationMap';
+import { ProducerLocationPanel } from '../components/ProducerLocationPanel';
 import * as producerApi from '../api/producerApi';
 import type { ProducerProfile } from '../types/producerTypes';
 import { VerificationDocumentsPanel } from '../../verification/components/VerificationDocumentsPanel';
@@ -15,11 +15,7 @@ export function ProducerProfilePage() {
   const isProducer = user?.roles.includes(ROLES.PRODUCER) ?? false;
   const isAdmin = user?.roles.includes(ROLES.ADMIN) ?? false;
   const [producerProfile, setProducerProfile] = useState<ProducerProfile | null>(null);
-  const [latitude, setLatitude] = useState('');
-  const [longitude, setLongitude] = useState('');
-  const [isEditingLocation, setIsEditingLocation] = useState(false);
   const [isLoadingProfile, setIsLoadingProfile] = useState(isProducer);
-  const [isSavingLocation, setIsSavingLocation] = useState(false);
   const [error, setError] = useState('');
 
   const initials = user?.fullName
@@ -42,9 +38,6 @@ export function ProducerProfilePage() {
           return;
         }
         setProducerProfile(profile);
-        setLatitude(profile.geoLatitude?.toString() ?? '');
-        setLongitude(profile.geoLongitude?.toString() ?? '');
-        setIsEditingLocation(!profile.geolocationCompleted);
       })
       .catch((caughtError) => {
         if (active) {
@@ -65,38 +58,6 @@ export function ProducerProfilePage() {
   async function handleLogout() {
     await logout();
     navigate(routes.login);
-  }
-
-  async function handleSaveLocation() {
-    setError('');
-
-    if (!latitude || !longitude) {
-      setError('Debe marcar una ubicacion en el mapa antes de guardar.');
-      return;
-    }
-
-    const parsedLatitude = Number(latitude);
-    const parsedLongitude = Number(longitude);
-    if (!Number.isFinite(parsedLatitude) || !Number.isFinite(parsedLongitude)) {
-      setError('Las coordenadas seleccionadas no son validas.');
-      return;
-    }
-
-    setIsSavingLocation(true);
-    try {
-      const updatedProfile = await producerApi.updateCurrentProducerLocation({
-        geoLatitude: parsedLatitude,
-        geoLongitude: parsedLongitude,
-      });
-      setProducerProfile(updatedProfile);
-      setLatitude(updatedProfile.geoLatitude?.toString() ?? '');
-      setLongitude(updatedProfile.geoLongitude?.toString() ?? '');
-      setIsEditingLocation(false);
-    } catch (caughtError) {
-      setError(resolveErrorMessage(caughtError));
-    } finally {
-      setIsSavingLocation(false);
-    }
   }
 
   return (
@@ -149,24 +110,8 @@ export function ProducerProfilePage() {
               <>
                 <dl className="grid grid-cols-1 gap-x-4 gap-y-6 sm:grid-cols-2">
                   <div className="sm:col-span-1">
-                    <dt className="text-sm font-medium text-slate-500">Finca</dt>
-                    <dd className="mt-1 text-sm font-semibold text-slate-900">{producerProfile.farmName}</dd>
-                  </div>
-                  <div className="sm:col-span-1">
                     <dt className="text-sm font-medium text-slate-500">Tipo productor</dt>
                     <dd className="mt-1 text-sm font-semibold text-slate-900">{formatProducerType(producerProfile.producerType)}</dd>
-                  </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm font-medium text-slate-500">Municipio</dt>
-                    <dd className="mt-1 text-sm font-semibold text-slate-900">{producerProfile.municipality}</dd>
-                  </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm font-medium text-slate-500">Provincia</dt>
-                    <dd className="mt-1 text-sm font-semibold text-slate-900">{producerProfile.province}</dd>
-                  </div>
-                  <div className="sm:col-span-1">
-                    <dt className="text-sm font-medium text-slate-500">Departamento</dt>
-                    <dd className="mt-1 text-sm font-semibold text-slate-900">{producerProfile.department}</dd>
                   </div>
                   <div className="sm:col-span-1">
                     <dt className="text-sm font-medium text-slate-500">Experiencia</dt>
@@ -174,87 +119,12 @@ export function ProducerProfilePage() {
                   </div>
                 </dl>
 
-                <div className="mt-8 flex items-center justify-between border-t border-slate-100 pt-6">
-                  <span className={producerProfile.geolocationCompleted ? 'inline-flex items-center rounded-md bg-green-50 px-2 py-1 text-xs font-medium text-green-700 ring-1 ring-inset ring-green-600/20' : 'inline-flex items-center rounded-md bg-yellow-50 px-2 py-1 text-xs font-medium text-yellow-800 ring-1 ring-inset ring-yellow-600/20'}>
-                    {producerProfile.geolocationCompleted
-                      ? 'Ubicacion GPS registrada'
-                      : 'Ubicacion GPS pendiente'}
-                  </span>
-                  {!isEditingLocation && (
-                    <button
-                      type="button"
-                      className="text-sm font-semibold text-green-700 transition hover:text-green-900"
-                      onClick={() => setIsEditingLocation(true)}
-                    >
-                      {producerProfile.geolocationCompleted ? 'Editar ubicacion' : 'Registrar ubicacion'}
-                    </button>
-                  )}
-                </div>
-
-                {producerProfile.geolocationCompleted && !isEditingLocation && (
-                  <dl className="mt-6 grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
-                    <div className="sm:col-span-1">
-                      <dt className="text-sm font-medium text-slate-500">Latitud</dt>
-                      <dd className="mt-1 text-sm font-semibold text-slate-900">{producerProfile.geoLatitude}</dd>
-                    </div>
-                    <div className="sm:col-span-1">
-                      <dt className="text-sm font-medium text-slate-500">Longitud</dt>
-                      <dd className="mt-1 text-sm font-semibold text-slate-900">{producerProfile.geoLongitude}</dd>
-                    </div>
-                  </dl>
-                )}
-
-                {isEditingLocation && (
-                  <div className="mt-6 space-y-6">
-                    <div className="overflow-hidden rounded-xl border border-slate-200">
-                      <ProducerLocationMap
-                        latitude={latitude}
-                        longitude={longitude}
-                        onChange={(nextLatitude, nextLongitude) => {
-                          setLatitude(nextLatitude);
-                          setLongitude(nextLongitude);
-                        }}
-                      />
-                    </div>
-
-                    <dl className="grid grid-cols-1 gap-x-4 gap-y-4 sm:grid-cols-2">
-                      <div className="sm:col-span-1">
-                        <dt className="text-sm font-medium text-slate-500">Latitud seleccionada</dt>
-                        <dd className="mt-1 text-sm font-semibold text-slate-900">{latitude || 'Sin seleccionar'}</dd>
-                      </div>
-                      <div className="sm:col-span-1">
-                        <dt className="text-sm font-medium text-slate-500">Longitud seleccionada</dt>
-                        <dd className="mt-1 text-sm font-semibold text-slate-900">{longitude || 'Sin seleccionar'}</dd>
-                      </div>
-                    </dl>
-
-                    <div className="flex items-center justify-end gap-3 border-t border-slate-100 pt-6">
-                      {producerProfile.geolocationCompleted && (
-                        <button
-                          type="button"
-                          className="px-4 py-2 text-sm font-semibold text-slate-600 transition hover:text-slate-900 disabled:opacity-70"
-                          disabled={isSavingLocation}
-                          onClick={() => {
-                            setLatitude(producerProfile.geoLatitude?.toString() ?? '');
-                            setLongitude(producerProfile.geoLongitude?.toString() ?? '');
-                            setIsEditingLocation(false);
-                            setError('');
-                          }}
-                        >
-                          Cancelar
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        className="flex items-center justify-center rounded-lg bg-green-800 px-4 py-2.5 text-sm font-extrabold text-white shadow-lg shadow-green-900/20 transition hover:bg-green-900 disabled:cursor-not-allowed disabled:opacity-70"
-                        disabled={isSavingLocation}
-                        onClick={handleSaveLocation}
-                      >
-                        {isSavingLocation ? 'Guardando...' : 'Guardar ubicacion'}
-                      </button>
-                    </div>
-                  </div>
-                )}
+            <div className="mt-8 border-t border-slate-100 pt-8">
+              <ProducerLocationPanel
+                profile={producerProfile}
+                onProfileUpdate={setProducerProfile}
+              />
+            </div>
               </>
             )}
           </div>
